@@ -1,0 +1,10 @@
+streamlit
+pandas
+plotly
+requests
+praw
+yfinance
+numpy
+langchain-openai
+langchain-core
+vaderSentiment
