@@ -801,67 +801,67 @@ def get_market_indices_robust():
             result[name] = {'price': 0, 'change': 0, 'mock': True}
     return result
 
-@st.cache_data(ttl=1800)
-def get_stock_history_enhanced(symbol):
-    try:
-        df = yf.download(symbol, period="1y", interval="1d", progress=False, auto_adjust=True)
-        if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-        df = df.reset_index()
-        clean_cols = {}
-        for c in df.columns:
-            if 'date' in str(c).lower(): clean_cols[c] = 'Date'
-            elif 'close' in str(c).lower(): clean_cols[c] = 'Close'
-            elif 'open' in str(c).lower(): clean_cols[c] = 'Open'
-            elif 'high' in str(c).lower(): clean_cols[c] = 'High'
-            elif 'low' in str(c).lower(): clean_cols[c] = 'Low'
-            elif 'volume' in str(c).lower(): clean_cols[c] = 'Volume'
-        df = df.rename(columns=clean_cols)
-        if 'Date' in df.columns: df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize(None)
+# @st.cache_data(ttl=1800)
+# def get_stock_history_enhanced(symbol):
+#     try:
+#         df = yf.download(symbol, period="1y", interval="1d", progress=False, auto_adjust=True)
+#         if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
+#         df = df.reset_index()
+#         clean_cols = {}
+#         for c in df.columns:
+#             if 'date' in str(c).lower(): clean_cols[c] = 'Date'
+#             elif 'close' in str(c).lower(): clean_cols[c] = 'Close'
+#             elif 'open' in str(c).lower(): clean_cols[c] = 'Open'
+#             elif 'high' in str(c).lower(): clean_cols[c] = 'High'
+#             elif 'low' in str(c).lower(): clean_cols[c] = 'Low'
+#             elif 'volume' in str(c).lower(): clean_cols[c] = 'Volume'
+#         df = df.rename(columns=clean_cols)
+#         if 'Date' in df.columns: df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize(None)
         
-        df['SMA_20'] = df['Close'].rolling(window=20).mean()
-        df['SMA_50'] = df['Close'].rolling(window=50).mean()
-        df['BB_Mid'] = df['Close'].rolling(window=20).mean()
-        df['BB_Std'] = df['Close'].rolling(window=20).std()
-        df['BB_Upper'] = df['BB_Mid'] + (df['BB_Std'] * 2)
-        df['BB_Lower'] = df['BB_Mid'] - (df['BB_Std'] * 2)
+#         df['SMA_20'] = df['Close'].rolling(window=20).mean()
+#         df['SMA_50'] = df['Close'].rolling(window=50).mean()
+#         df['BB_Mid'] = df['Close'].rolling(window=20).mean()
+#         df['BB_Std'] = df['Close'].rolling(window=20).std()
+#         df['BB_Upper'] = df['BB_Mid'] + (df['BB_Std'] * 2)
+#         df['BB_Lower'] = df['BB_Mid'] - (df['BB_Std'] * 2)
         
-        if df.empty or 'Close' not in df.columns: raise ValueError
-        return df, False
-    except:
-        return generate_mock_data(symbol), True
+#         if df.empty or 'Close' not in df.columns: raise ValueError
+#         return df, False
+#     except:
+#         return generate_mock_data(symbol), True
 
-@st.cache_data(ttl=3600)
-def get_finnhub_news(symbol):
-    try:
-        end = datetime.now().strftime('%Y-%m-%d')
-        start = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-        news = requests.get(f"{FINNHUB_BASE_URL}/company-news", 
-                          params={'symbol': symbol, 'from': start, 'to': end, 'token': FINNHUB_API_KEY}).json()
-        return news[:8]
-    except: return []
+# @st.cache_data(ttl=3600)
+# def get_finnhub_news(symbol):
+#     try:
+#         end = datetime.now().strftime('%Y-%m-%d')
+#         start = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+#         news = requests.get(f"{FINNHUB_BASE_URL}/company-news", 
+#                           params={'symbol': symbol, 'from': start, 'to': end, 'token': FINNHUB_API_KEY}).json()
+#         return news[:8]
+#     except: return []
 
-@st.cache_data(ttl=300)
-def get_reddit_sentiment(symbol):
-    posts_data = []
-    sentiment_score = 0
-    count = 0
-    if not RESOURCES['reddit']: return 0, []
-    try:
-        for submission in RESOURCES['reddit'].subreddit("stocks+wallstreetbets+investing").search(symbol, limit=15, time_filter="week"):
-            title = submission.title
-            score = RESOURCES['vader'].polarity_scores(title)['compound']
-            sentiment_score += score
-            count += 1
-            posts_data.append({"title": title, "score": score, "url": submission.url})
-    except: return 0, []
-    avg_sentiment = sentiment_score / count if count > 0 else 0
-    return avg_sentiment, posts_data
+# @st.cache_data(ttl=300)
+# def get_reddit_sentiment(symbol):
+#     posts_data = []
+#     sentiment_score = 0
+#     count = 0
+#     if not RESOURCES['reddit']: return 0, []
+#     try:
+#         for submission in RESOURCES['reddit'].subreddit("stocks+wallstreetbets+investing").search(symbol, limit=15, time_filter="week"):
+#             title = submission.title
+#             score = RESOURCES['vader'].polarity_scores(title)['compound']
+#             sentiment_score += score
+#             count += 1
+#             posts_data.append({"title": title, "score": score, "url": submission.url})
+#     except: return 0, []
+#     avg_sentiment = sentiment_score / count if count > 0 else 0
+#     return avg_sentiment, posts_data
 
-def get_basic_financials(symbol):
-    try:
-        metric = requests.get(f"{FINNHUB_BASE_URL}/stock/metric", params={'symbol': symbol, 'metric': 'all', 'token': FINNHUB_API_KEY}).json()
-        return metric.get('metric', {})
-    except: return {}
+# def get_basic_financials(symbol):
+#     try:
+#         metric = requests.get(f"{FINNHUB_BASE_URL}/stock/metric", params={'symbol': symbol, 'metric': 'all', 'token': FINNHUB_API_KEY}).json()
+#         return metric.get('metric', {})
+#     except: return {}
 
 # ==========================================
 # 3. 新增业务逻辑：自动研报 & 行业荐股
