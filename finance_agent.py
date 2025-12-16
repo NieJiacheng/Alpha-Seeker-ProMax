@@ -1237,7 +1237,7 @@ def main():
                 m_cols = st.columns(3)
                 m_cols[0].metric("P/E Ratio (TTM)", f"{financial_metrics.get('peBasicExclExtraTTM', 0):.2f}") # 英文修改
                 m_cols[1].metric("EPS", f"{financial_metrics.get('epsExclExtraItemsTTM', 0):.2f}") # 英文修改
-                m_cols2[2].metric("Beta", f"{financial_metrics.get('beta', 0):.2f}")
+                m_cols[2].metric("Beta", f"{financial_metrics.get('beta', 0):.2f}")
                 
                 m_cols2 = st.columns(3)
                 m_cols2[0].metric("52-Week High", f"{financial_metrics.get('52WeekHigh', 0):.2f}") # 英文修改
