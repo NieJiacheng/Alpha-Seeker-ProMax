@@ -1140,7 +1140,7 @@ def main():
     c1, c2 = st.columns([3, 1])
     with c1: st.title("🚀 AlphaSeeker Pro Max")
     with c2:
-        symbol_input = st.text_input("🔍 Stock Ticker:", value=st.session_state.symbol).upper() # 英文修改
+        symbol_input = st.text_input("🔍 Stock Ticker (US Stocks Only):", value=st.session_state.symbol).upper() # 英文修改
         start_scan = st.button("🚀 Start Deep Scan & Generate Report", type="primary") # 英文修改
 
     if start_scan:
