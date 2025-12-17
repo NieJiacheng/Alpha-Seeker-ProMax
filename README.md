@@ -76,7 +76,7 @@ To handle the latency of LLM generation, the system utilizes **Streamlit's Progr
     streamlit run finance_agent.py
     ```
 
-### You may try our deployed agent at https://finagent-ehzqypk5tunvywutvhuhg2.streamlit.app/
+### You may try our deployed agent at https://finagent-ehzqypk5tunvywutvhuhg2.streamlit.app/ (Please do NOT ask the agent too frequently due to the instability and response frequency limit of free yfinance API)
 
 ---
 
