@@ -1,5 +1,7 @@
 # 🏦 AlphaSeeker Pro Max: AI-Powered Financial Investment Research Agent
 
+### You may try our deployed agent at https://finagent-ehzqypk5tunvywutvhuhg2.streamlit.app/ 
+
 AlphaSeeker is a high-performance, full-stack investment research agent designed to bridge the gap between institutional-grade analysis and retail market sentiment. By fusing real-time market data, fundamental metrics, and social media pulses (Reddit), AlphaSeeker provides a 24/7 "Cognitive Engine" for modern financial decision-making.
 
 ---
