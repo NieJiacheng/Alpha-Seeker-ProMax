@@ -32,19 +32,19 @@
 #     st.session_state.sector_recommendation = None # 存储荐股结果
 
 # # --- API Keys ---
-# DEEPSEEK_API_KEY = "sk-cafba043052344568e72f6d9be865c7d"
+# DEEPSEEK_API_KEY = "YourDeepSeekAPIKey"
 # DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 # DEEPSEEK_MODEL = "deepseek-chat" # 或 deepseek-chat
-# FINNHUB_API_KEY = "d46s26hr01qgc9euamk0d46s26hr01qgc9euamkg"
+# FINNHUB_API_KEY = "YourFinhubAPIKey"
 # FINNHUB_BASE_URL = "https://finnhub.io/api/v1"
 
 # # Reddit Config
 # REDDIT_CONFIG = {
-#     "client_id": "kpCP6k3-q3wWb0UGhGgk-w",
-#     "client_secret": "3JXSxS2Rs32EzEr09Ywd-XiWCpUCvA",
-#     "user_agent": "Financial_AI_Agent_V1",
-#     "username": "ParamedicRelative368",
-#     "password": "Tsm@928501"
+#     "client_id": "YourClientID",
+#     "client_secret": "YourClientSecret",
+#     "user_agent": "YourAgentName",
+#     "username": "YourRedditName",
+#     "password": "YourRedditPassword"
 # }
 
 # # CSS 样式
@@ -722,19 +722,19 @@ if 'sector_recommendation' not in st.session_state:
     st.session_state.sector_recommendation = None # 存储荐股结果
 
 # --- API Keys ---
-DEEPSEEK_API_KEY = "sk-cafba043052344568e72f6d9be865c7d"
+DEEPSEEK_API_KEY = "YourDeepSeekAPIKey"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 DEEPSEEK_MODEL = "deepseek-chat" # 或 deepseek-chat
-FINNHUB_API_KEY = "d46s26hr01qgc9euamk0d46s26hr01qgc9euamkg"
+FINNHUB_API_KEY = "YourFinhubAPIKey"
 FINNHUB_BASE_URL = "https://finnhub.io/api/v1"
 
 # Reddit Config
 REDDIT_CONFIG = {
-    "client_id": "kpCP6k3-q3wWb0UGhGgk-w",
-    "client_secret": "3JXSxS2Rs32EzEr09Ywd-XiWCpUCvA",
-    "user_agent": "Financial_AI_Agent_V1",
-    "username": "ParamedicRelative368",
-    "password": "Tsm@928501"
+    "client_id": "YourClientID",
+    "client_secret": "YourClientSecret",
+    "user_agent": "YourAgentName",
+    "username": "YourRedditName",
+    "password": "YourRedditPassword"
 }
 
 # CSS 样式
