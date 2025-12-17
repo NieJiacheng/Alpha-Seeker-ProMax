@@ -115,11 +115,9 @@ def get_market_indices_robust():
 # ==========================================
 
 def generate_full_report(symbol, quote, financials, news_list, sentiment_score, hist_df):
-    """调用 LLM 生成深度研报""" #
     if not RESOURCES['llm']:
         return "⚠️ LLM service is not connected, report generation failed." #
 
-    # 准备上下文数据 #
     news_context = "\n".join([f"- {n['headline']}" for n in news_list[:5]])
     tech_trend = "Bullish" if hist_df['Close'].iloc[-1] > hist_df['SMA_50'].iloc[-1] else "Bearish" #
     
@@ -152,8 +150,6 @@ def generate_full_report(symbol, quote, financials, news_list, sentiment_score, 
         return f"Report generation failed: {str(e)}" #
 
 def get_sector_tickers(sector_name):
-    """根据行业名称获取代表性股票代码""" #
-    # 常用行业硬编码，自定义行业通过 LLM 获取 #
     predefined = {
         "AI & Semiconductors": ["NVDA", "AMD", "INTC", "TSM", "AVGO"], #
         "Tech Giants (Mag 7)": ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "NVDA"], #
@@ -165,7 +161,6 @@ def get_sector_tickers(sector_name):
     if sector_name in predefined:
         return predefined[sector_name]
     
-    # 如果是用户自定义输入（如“量子计算”），让 LLM 推荐 #
     if RESOURCES['llm']:
         prompt = f"Please list 5 US-listed stock tickers belonging to the '{sector_name}' sector. Return only the tickers, separated by commas, with no other text. For example: AAPL, MSFT" #
         try:
@@ -176,7 +171,6 @@ def get_sector_tickers(sector_name):
     return []
 
 def analyze_sector_recommendation(sector_name, tickers):
-    """分析行业并给出推荐""" 
     if not tickers: return "No stocks found for this sector." 
     
     data_summary = []
@@ -215,7 +209,6 @@ def analyze_sector_recommendation(sector_name, tickers):
     
     try:
         resp = RESOURCES['llm'].invoke([HumanMessage(content=prompt)]).content
-        # 清理可能的 markdown  # 
         if "```json" in resp: resp = resp.split("```json")[1].split("```")[0]
         elif "```" in resp: resp = resp.split("```")[1].split("```")[0]
         return json.loads(resp)
@@ -224,7 +217,6 @@ def analyze_sector_recommendation(sector_name, tickers):
 
 @st.cache_data(ttl=1800)
 def get_stock_history_enhanced(symbol):
-    """K线获取 + 技术指标计算""" 
     try:
         df = yf.download(symbol, period="1y", interval="1d", progress=False, auto_adjust=True)
         if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
@@ -240,7 +232,6 @@ def get_stock_history_enhanced(symbol):
         df = df.rename(columns=clean_cols)
         if 'Date' in df.columns: df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize(None)
         
-        # 计算
         df['SMA_20'] = df['Close'].rolling(window=20).mean()
         df['SMA_50'] = df['Close'].rolling(window=50).mean()
         # Bollinger Bands
@@ -256,19 +247,17 @@ def get_stock_history_enhanced(symbol):
 
 @st.cache_data(ttl=3600)
 def get_finnhub_news(symbol):
-    """获取 Finnhub 公司新闻""" 
     try:
         end = datetime.now().strftime('%Y-%m-%d')
         start = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
         news = requests.get(f"{FINNHUB_BASE_URL}/company-news", 
                           params={'symbol': symbol, 'from': start, 'to': end, 'token': FINNHUB_API_KEY}).json()
-        return news[:10] # 返回最新的10条
+        return news[:10] 
     except:
         return []
 
 @st.cache_data(ttl=300)
 def get_reddit_sentiment(symbol):
-    """分析 Reddit 舆情 (新功能)""" 
     posts_data = []
     sentiment_score = 0
     count = 0
@@ -277,7 +266,6 @@ def get_reddit_sentiment(symbol):
         return 0, []
 
     try:
-        # 搜索
         for submission in RESOURCES['reddit'].subreddit("stocks+wallstreetbets+investing").search(symbol, limit=20, time_filter="week"):
             title = submission.title
             score = RESOURCES['vader'].polarity_scores(title)['compound']
@@ -297,7 +285,6 @@ def get_reddit_sentiment(symbol):
     return avg_sentiment, posts_data
 
 def get_filtered_peers(symbol):
-    """竞品""" 
     peers_list = []
     try:
         r = requests.get(f"{FINNHUB_BASE_URL}/stock/peers", params={'symbol': symbol, 'token': FINNHUB_API_KEY})
@@ -316,7 +303,6 @@ def get_filtered_peers(symbol):
     return peers_list
 
 def get_basic_financials(symbol):
-    """获取财务数据"""
     try:
         metric = requests.get(f"{FINNHUB_BASE_URL}/stock/metric", params={'symbol': symbol, 'metric': 'all', 'token': FINNHUB_API_KEY}).json()
         return metric.get('metric', {})
@@ -340,7 +326,6 @@ def plot_radar_fundamentals(quote, profile, metrics):
     pe = metrics.get('peBasicExclExtraTTM', 20)
     beta = metrics.get('beta', 1)
     
-    # 归一化分数计算 (简化逻辑)
     scores = {
         'Low Valuation': max(0, min(100, 100 - pe if pe else 50)),
         'Growth': 85, 
@@ -389,15 +374,14 @@ def main():
 
     if start_scan:
         st.session_state.symbol = symbol_input
-        st.session_state.chat_history = [] # 重置聊天 
-        st.session_state.analysis_report = "" # 重置报告 
+        st.session_state.chat_history = [] 
+        st.session_state.analysis_report = "" 
         st.rerun()
 
     symbol = st.session_state.symbol
     
     # --- Data Fetching ---
     with st.spinner(f"Scanning {symbol} data and generating report across the web..."): 
-        # 1. 基础数据 
         try:
             quote = requests.get(f"{FINNHUB_BASE_URL}/quote", params={'symbol': symbol, 'token': FINNHUB_API_KEY}).json()
             profile = requests.get(f"{FINNHUB_BASE_URL}/stock/profile2", params={'symbol': symbol, 'token': FINNHUB_API_KEY}).json()
@@ -409,8 +393,7 @@ def main():
         news_list = get_finnhub_news(symbol)
         sentiment_score, reddit_posts = get_reddit_sentiment(symbol)
         peers = get_filtered_peers(symbol)
-        
-        # 2. 自动生成研报 (如果是点击了按钮，且报告为空
+
         if start_scan or not st.session_state.analysis_report:
             report = generate_full_report(symbol, quote, financials, news_list, sentiment_score, hist_df)
             st.session_state.analysis_report = report
@@ -439,7 +422,7 @@ def main():
     t_report, t_chart, t2, t3, t4, t_rec, t_chat = st.tabs(["📝 Deep Dive Report", "📈 Market Data",  "🧬 Fundamentals & Financials", "🔥 Sentiment & News", "⚔️ Peer Comparison", "🎯 Smart Sector Picks", "🤖 AI Q&A"]) #
  
 
-    # Tab 1: 深度研报 (新增功能) 
+    # Tab 1
     with t_report:
         st.subheader(f"📄 {symbol} Investment Analysis Report (AI Generated)") #
         if st.session_state.analysis_report:
@@ -447,7 +430,6 @@ def main():
         else:
             st.info("Please click 'Start Deep Scan' above to generate the report.") #
         
-        # 附带舆情摘要 #
         st.markdown("---")
         c1, c2 = st.columns(2)
         with c1:
@@ -458,7 +440,7 @@ def main():
             for n in news_list[:3]:
                 st.markdown(f"- [{n['headline']}]({n['url']})")
 
-    # Tab 2: 市场数据 #
+    # Tab 2
     with t_chart:
         if not hist_df.empty:
             st.plotly_chart(plot_advanced_chart(hist_df, symbol), use_container_width=True)
@@ -489,7 +471,7 @@ def main():
             else:
                 st.info("No detailed financial data available.") #
 
-    # Tab 3: 舆情与新闻 (全新功能) #
+    # Tab 3
     with t3:
         c1, c2 = st.columns([1, 1])
         
@@ -532,7 +514,7 @@ def main():
             else:
                 st.info("No latest news available.") #
 
-    # Tab 4: 竞品 #
+    # Tab 4
     with t4:
         st.subheader(f"⚔️ {symbol}'s Main Competitors") #
         if peers:
@@ -552,7 +534,7 @@ def main():
                         st.rerun()
         else:
             st.info("No suitable competitors found.") #
-    # Tab 3: 智能荐股 (新增功能) #
+    # Tab 3
     with t_rec:
         st.subheader("🎯 Sector Scan and Stock Picks") #
         st.write("Select a sector to let the AI scan its leading stocks and provide trading recommendations.") #
@@ -580,13 +562,13 @@ def main():
                 else:
                     st.error("Could not identify the sector or find relevant stocks.") #
         
-        # 展示荐股结果 #
+        # 
         if st.session_state.sector_recommendation and isinstance(st.session_state.sector_recommendation, list):
             st.markdown("### 📋 AI Trading Recommendation Letter") #
             rec_cols = st.columns(3)
             for i, rec in enumerate(st.session_state.sector_recommendation):
                 action = rec.get('action', 'Hold')
-                style_class = "rec-buy" if "Buy" in action or "买入" in action else "rec-sell" if "Sell" in action or "卖出" in action else "rec-hold" # 保留中文判断以防LLM返回中文
+                style_class = "rec-buy" if "Buy" in action or "买入" in action else "rec-sell" if "Sell" in action or "卖出" in action else "rec-hold" #
                 stars = "⭐" * int(rec.get('stars', 3))
                 
                 with rec_cols[i % 3]:
@@ -599,7 +581,7 @@ def main():
                     </div>
                     """, unsafe_allow_html=True)
 
-    # Tab 4: AI Q&A #
+    # Tab 4
     with t_chat:
         st.subheader(f"🤖 Ask the AI ({st.session_state.persona})") #
         for msg in st.session_state.chat_history:
@@ -612,7 +594,6 @@ def main():
             
             if RESOURCES['llm']:
                 
-                # --- 动态注入当前日期 ---
                 current_date = datetime.now().strftime("%Y-%m-%d")
                 
                 sys_prompt = f"""
@@ -620,7 +601,7 @@ def main():
                 You are currently analyzing {symbol}. 
                 Crucially, **THE CURRENT DATE is {current_date}**. 
                 Use this context for any time-sensitive questions and reference data up to this date.
-                """ #添加日期信息
+                """
                 # -----------------------------------------------
                 
                 full_context = [SystemMessage(content=sys_prompt), HumanMessage(content=user_input)]
