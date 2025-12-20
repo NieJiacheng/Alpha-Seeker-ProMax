@@ -12,6 +12,8 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
+import os
+
 # ==========================================
 # ==========================================
 
@@ -32,19 +34,19 @@ if 'sector_recommendation' not in st.session_state:
     st.session_state.sector_recommendation = None 
 
 # --- API Keys ---
-DEEPSEEK_API_KEY = "YourDeepSeekAPIKey"
+DEEPSEEK_API_KEY = os.environ["YourDeepSeekAPIKey"]
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
 DEEPSEEK_MODEL = "deepseek-chat" # deepseek-chat
-FINNHUB_API_KEY = "YourFinhubAPIKey"
+FINNHUB_API_KEY = os.environ["YourFinhubAPIKey"]
 FINNHUB_BASE_URL = "https://finnhub.io/api/v1"
 
 # Reddit Config
 REDDIT_CONFIG = {
-    "client_id": "YourClientID",
-    "client_secret": "YourClientSecret",
-    "user_agent": "YourAgentName",
-    "username": "YourRedditName",
-    "password": "YourRedditPassword"
+    "client_id": os.environ["YourClientID"],
+    "client_secret": os.environ["YourClientSecret"],
+    "user_agent": os.environ["YourAgentName"],
+    "username": os.environ["YourRedditName"],
+    "password": os.environ["YourRedditPassword"]
 }
 
 # CSS 
